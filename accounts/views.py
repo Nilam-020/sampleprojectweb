@@ -14,9 +14,7 @@ def register(request):
             if User.objects.filter(username=username).exists():
                 # print("username taken")
                 messages.info(request, 'Username taken')
-            elif User.objects.filter(email==email).exists():
-                    # print("email already taken")
-                    messages.info(request, 'Email taken')
+
             else:
                 user = User.objects.create_user(first_name=first_name, last_name=last_name, username=username, password=password1, email=email)
                 user.save()
@@ -31,7 +29,23 @@ def register(request):
 
 
 def login(request):
-    return render(request,'login.html')
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
+
+        user = auth.authenticate(username=username, password=password)
+
+        if user is not None:
+            auth.login(request, user)
+            return redirect("about")
+            # return HttpResponse()
+        else:
+            messages.info(request, 'invalid Credential')
+            return redirect('login/')
+
+    else:
+        return render(request, 'login.html')
+    # return render(request,'login.html')
 
 def about(request):
     return render(request,'about.html')
